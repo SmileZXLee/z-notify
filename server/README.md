@@ -1,44 +1,61 @@
-# z-notify-api
+# Z-Notify - 后端服务 (server)
+
 <p align="center">
-    <img alt="logo" src="https://admin.z-notify.zxlee.cn/logo.png" width="120" height="120" style="margin-bottom: 50px;">
+    <img alt="logo" src="https://admin.z-notify.zxlee.cn/logo.png" width="100" height="100" style="margin-bottom: 20px;">
 </p>
-<h1 align="center">Z-Notify-Api</h1>
-<h5 align="center">一个开源的应用统一在线管理平台(api)</h5>
 
-## 链接
+`server` 目录是 `Z-Notify` 平台的后端 API 服务模块。基于 Spring Boot 2.x、MySQL 和 Redis 搭建，为管理后台与公共 H5 反馈页提供接口支持。
 
-* 后台管理页面地址：[https://admin.z-notify.zxlee.cn](https://admin.z-notify.zxlee.cn)
+## 🛠️ 技术栈
+* **核心框架**：Spring Boot 2.x
+* **连接池与监控**：Druid 1.x
+* **数据库**：MySQL 8.x + MyBatis ORM
+* **缓存与校验**：Redis + Spring Validation
+* **邮件服务**：Spring Mail + Thymeleaf 邮箱验证码模板
+* **文件存储**：阿里云 OSS SDK 
+* **接口文档**：Swagger 3.0 (Springfox)
 
-* 后台管理源码地址：[https://github.com/SmileZXLee/z-notify-admin-vue](https://github.com/SmileZXLee/z-notify-admin-vue)
+---
 
-* 公共页(反馈页)源码地址：[https://github.com/SmileZXLee/z-notify-public](https://github.com/SmileZXLee/z-notify-public)
+## 🚀 运行与部署指南
 
-* API文档地址：[https://api.z-notify.zxlee.cn/swagger-ui/index.html](https://api.z-notify.zxlee.cn/swagger-ui/index.html)
+### 1. 准备工作
+在启动后端服务前，请先准备好以下基础环境：
+- **JDK 1.8+**
+- **Maven 3.6+**
+- **MySQL 8.x**（需创建数据库并导入结构）
+- **Redis 6.x**
 
+### 2. 初始化数据库
+1. 创建名称为 `z-notify` 的数据库（推荐使用 `utf8mb4` 字符集）。
+2. 执行 **[db/ddl.sql](file:///Users/zxlee/Documents/GitHub/z-notify-api/server/db/ddl.sql)** 结构脚本，初始化所需的数据表。
 
-## 主要功能
-* 版本管理，通过公共接口返回所有新版本号、更新内容、下载地址
+### 3. 修改配置文件
+打开 **[src/main/resources/application.properties](file:///Users/zxlee/Documents/GitHub/z-notify-api/server/src/main/resources/application.properties)**，修改以下配置参数：
+- 数据库连接信息 (`spring.datasource.url`、`username`、`password`)
+- Redis 主机与密码 (`spring.redis.host`、`port`、`password`)
+- 邮箱发信配置 (`spring.mail.username`、`password` 等，使用 163 或其他 SMTP 授权码)
+- 阿里云 OSS 密钥配置（用于用户反馈图片上传）
 
-* 通知管理，支持发布通知和设置过期时间，通过公共接口获取所有未过期的通知
+### 4. 运行服务
+在 `server` 根目录下执行以下命令启动项目：
 
-* 通用文本管理，可以随意自定义key并通过公共接口获取key对应的文本
+```bash
+# 启动服务
+./mvnw spring-boot:run
+```
+或者使用 Maven 打包：
+```bash
+# 清理并打成 jar 包（产物在 target 目录）
+./mvnw clean package -Dmaven.test.skip=true
+```
 
-* 反馈管理，提供用户反馈提交页，用户提交后可在管理后台查看并回复，用户可在反馈页查看开发者回复的内容
+启动成功后，可在浏览器访问：
+- **Swagger API 文档**：`http://localhost:8901/swagger-ui/index.html`
 
-* 用户流量统计&分析，支持生成`badge`嵌入网页统计访问次数，支持根据ip统计访问人数等，流量分析可在管理后台查看，例如：在网页或md中插入`![visitors](https://api.z-notify.zxlee.cn/v1/public/statistics/8299976976587751424/badge)`
+---
 
-## 预览
-#### 项目列表
-[![overview](https://admin.z-notify.zxlee.cn/public/overview.png)](https://admin.z-notify.zxlee.cn)
-#### 统计分析
-[![overview](https://admin.z-notify.zxlee.cn/public/demo-analysis-2.png)](https://admin.z-notify.zxlee.cn)
-
-## 使用到的技术
-* spring-boot+druid+mybatis实现接口处理和数据库访问，数据库使用MySQL
-* 接口风格遵循RESTful Api规范；接口文档使用swagger3.0生成
-* 使用spring-boot-validation进行统一参数校验
-* 全局异常拦截&处理；统一接口返回格式
-* 基础的Mapper、Service、分页等封装；id通过雪花算法生成
-* 使用redis进行token的存储&统一身份认证
-* 使用redis进行邮箱验证码存储；使用spring-boot-mail+thymeleaf发送指定样式的邮箱验证码
-* 多文件上传至oss
+## 🔗 相关模块
+- 返回主项目：**[Z-Notify (主 README)](file:///Users/zxlee/Documents/GitHub/z-notify-api/README.md)**
+- 后台管理系统：**[admin/README.md](file:///Users/zxlee/Documents/GitHub/z-notify-api/admin/README.md)**
+- H5 客户端/反馈页：**[public/README.md](file:///Users/zxlee/Documents/GitHub/z-notify-api/public/README.md)**

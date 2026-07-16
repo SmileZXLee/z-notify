@@ -1,76 +1,66 @@
-# z-notify-admin-vue
+# Z-Notify - 管理后台 (admin)
 
 <p align="center">
-    <img alt="logo" src="https://admin.z-notify.zxlee.cn/logo.png" width="120" height="120" style="margin-bottom: 50px;">
+    <img alt="logo" src="https://admin.z-notify.zxlee.cn/logo.png" width="100" height="100" style="margin-bottom: 20px;">
 </p>
-<h1 align="center">z-notify-admin-vue</h1>
-<h5 align="center">一个开源的应用统一在线管理平台(web)</h5>
 
-## 链接
+`admin` 目录是 `Z-Notify` 平台的 Web 后台管理系统模块。基于 Vue 2 与 Element UI 构建，提供给系统管理员使用。
 
-* 后台管理页面地址：[https://admin.z-notify.zxlee.cn](https://admin.z-notify.zxlee.cn)
+## 🛠️ 主要功能
+- **项目管理**：支持多项目（应用）独立配置隔离。
+- **版本控制**：配置发布新版本、热更新下载地址以及强更选项。
+- **通知公告**：发布过期自动失效的系统通知。
+- **云配置/通用文本**：可视化的动态 KV 配置面板。
+- **反馈处理**：查看用户在移动端提交的反馈内容，支持管理员回复、标记解决状态。
+- **流量统计分析**：以图表形式直观展示各应用的每日访问次数、PV/UV、地域分布及访问来源。
 
-* 公共页(反馈页)源码地址：[https://github.com/SmileZXLee/z-notify-public](https://github.com/SmileZXLee/z-notify-public)
+---
 
-* API文档地址：[https://api.z-notify.zxlee.cn/swagger-ui/index.html](https://api.z-notify.zxlee.cn/swagger-ui/index.html)
+## 🚀 运行与部署指南
 
-* API源码地址：[https://github.com/SmileZXLee/z-notify-api](https://github.com/SmileZXLee/z-notify-api)
+### 1. 准备工作
+请确保你已安装了 [Node.js](https://nodejs.org/)（推荐 v14.x 或 v16.x）和包管理工具 `npm` / `yarn`。
 
+### 2. 进入目录并安装依赖
+在最外层项目根目录下，先进入 `admin` 文件夹：
 
-## 主要功能
-* 版本管理，通过公共接口返回所有新版本号、更新内容、下载地址
-
-* 通知管理，支持发布通知和设置过期时间，通过公共接口获取所有未过期的通知
-
-* 通用文本管理，可以随意自定义key并通过公共接口获取key对应的文本
-
-* 反馈管理，提供用户反馈提交页，用户提交后可在管理后台查看并回复，用户可在反馈页查看开发者回复的内容
-
-* 用户流量统计&分析，支持生成`badge`嵌入网页统计访问次数，支持根据ip统计访问人数等，流量分析可在管理后台查看。例如：在网页或md中插入`![visitors](https://api.z-notify.zxlee.cn/v1/public/statistics/8299976976587751424/badge)`
-
-预览
-----
-#### 项目列表
-[![overview](https://admin.z-notify.zxlee.cn/public/overview.png)](https://admin.z-notify.zxlee.cn)
-#### 统计分析
-[![overview](https://admin.z-notify.zxlee.cn/public/demo-analysis-2.png)](https://admin.z-notify.zxlee.cn)
- 
-项目下载和运行
-----
-
-- 拉取项目代码
 ```bash
-git clone https://github.com/SmileZXLee/z-notify-admin-vue.git
-cd z-notify-admin-vue
+cd admin
 ```
 
-- 安装依赖
-```
+安装所需依赖：
+```bash
+# 使用 yarn 安装
 yarn install
+
+# 或者使用 npm 安装
+npm install
 ```
 
-- 开发模式运行
-```
+### 3. 修改配置
+根据需要修改环境变量配置文件：
+- **开发环境配置**：**[.env.development](file:///Users/zxlee/Documents/GitHub/z-notify-api/admin/.env.development)**（默认对接 `http://localhost:8901` 后端服务）
+- **生产环境配置**：**[.env](file:///Users/zxlee/Documents/GitHub/z-notify-api/admin/.env)** / **[.env.preview](file:///Users/zxlee/Documents/GitHub/z-notify-api/admin/.env.preview)**
+
+### 4. 启动开发模式
+运行以下命令启动本地开发热重载服务器：
+```bash
 yarn run serve
+# 或者 npm run serve
 ```
+启动成功后，可在浏览器访问：`http://localhost:8900`（或控制台输出的本地端口）。
 
-- 编译项目
-```
+### 5. 编译打包
+用于生产环境部署的构建命令：
+```bash
 yarn run build
+# 或者 npm run build
 ```
+打包产物将输出在 `admin/dist` 目录下，可直接使用 Nginx 进行静态资源代理部署。
 
-- Lints and fixes files
-```
-yarn run lint
-```
+---
 
-## 浏览器兼容
-
-Modern browsers and IE10.
-
-| [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>IE / Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/opera/opera_48x48.png" alt="Opera" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Opera |
-| --- | --- | --- | --- | --- |
-| IE10, Edge | last 2 versions | last 2 versions | last 2 versions | last 2 versions |
-
-## 其他功能
-正在开发...
+## 🔗 相关模块
+- 返回主项目：**[Z-Notify (主 README)](file:///Users/zxlee/Documents/GitHub/z-notify-api/README.md)**
+- 后端服务接口：**[server/README.md](file:///Users/zxlee/Documents/GitHub/z-notify-api/server/README.md)**
+- H5 客户端/反馈页：**[public/README.md](file:///Users/zxlee/Documents/GitHub/z-notify-api/public/README.md)**
