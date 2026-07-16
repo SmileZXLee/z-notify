@@ -80,8 +80,12 @@ public class PublicController {
     @GetMapping("/versions/{project_id}/{version}")
     @ApiOperation("根据版本号获取版本，传当前版本号，会返回高于此版本的所有版本，如果为空则代表没有新版本")
     @NoLoginAuth
-    public Result<List<VersionVO>> getVersions(@NotEmpty @PathVariable("project_id") String projectId, @Pattern(regexp = "^\\d(.\\d)*$", message = "版本号格式不合法") @PathVariable("version") String version){
-        return Result.success(versionService.publicListByVersion(projectId, version));
+    public Result<List<VersionVO>> getVersions(
+            @NotEmpty @PathVariable("project_id") String projectId,
+            @Pattern(regexp = "^\\d(.\\d)*$", message = "版本号格式不合法") @PathVariable("version") String version,
+            @RequestParam(value = "platform", required = false) String platform,
+            @RequestParam(value = "lang", required = false) String lang){
+        return Result.success(versionService.publicListByVersion(projectId, version, platform, lang));
     }
 
     @PostMapping("/feedback/feedback")
