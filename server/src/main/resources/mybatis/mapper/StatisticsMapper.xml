@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zxlee.znotifyapi.mapper.StatisticsMapper">
+    <select id="list" resultType="StatisticsPO" parameterType="Map">
+        SELECT * FROM `t_statistics` WHERE `project_id` = #{projectId} ORDER BY `createtime` DESC
+    </select>
+
+    <select id="getAnalysisSummary" resultType="cn.zxlee.znotifyapi.pojo.vo.StatisticsAnalysisResultVO">
+        SELECT 
+            COUNT(1) AS `viewCount`,
+            COUNT(DISTINCT <choose><when test="by == 'tag'">`tag`</when><otherwise>`ip`</otherwise></choose>) AS `visitorCount`,
+            
+            COUNT(CASE WHEN `createtime` >= CURDATE() THEN 1 END) AS `todayViewCount`,
+            COUNT(DISTINCT CASE WHEN `createtime` >= CURDATE() THEN <choose><when test="by == 'tag'">`tag`</when><otherwise>`ip`</otherwise></choose> END) AS `todayVisitorCount`,
+            
+            COUNT(CASE WHEN `createtime` >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) AND `createtime` &lt; CURDATE() THEN 1 END) AS `yesterdayViewCount`,
+            COUNT(DISTINCT CASE WHEN `createtime` >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) AND `createtime` &lt; CURDATE() THEN <choose><when test="by == 'tag'">`tag`</when><otherwise>`ip`</otherwise></choose> END) AS `yesterdayVisitorCount`,
+            
+            COUNT(CASE WHEN `createtime` >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 END) AS `days7ViewCount`,
+            COUNT(CASE WHEN `createtime` >= DATE_SUB(CURDATE(), INTERVAL 14 DAY) AND `createtime` &lt; DATE_SUB(CURDATE(), INTERVAL 6 DAY) THEN 1 END) AS `lastDays7ViewCount`,
+            COUNT(CASE WHEN `createtime` >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN 1 END) AS `days30ViewCount`
+        FROM `t_statistics`
+        WHERE `project_id` = #{projectId}
+    </select>
+
+    <select id="countGroupBy" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM (
+            SELECT 1 FROM `t_statistics` 
+            WHERE `project_id` = #{projectId} 
+            GROUP BY 
+            <choose>
+                <when test="by == 'tag'">`tag`</when>
+                <otherwise>`ip`</otherwise>
+            </choose>
+        ) AS `t_count`
+    </select>
+
+    <select id="todayCountGroupBy" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM (
+            SELECT 1 FROM `t_statistics` 
+            WHERE `project_id` = #{projectId} 
+            AND `createtime` >= CURDATE() 
+            GROUP BY 
+            <choose>
+                <when test="by == 'tag'">`tag`</when>
+                <otherwise>`ip`</otherwise>
+            </choose>
+        ) AS `t_count`
+    </select>
+
+    <select id="yesterdayCountGroupBy" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM (
+            SELECT 1 FROM `t_statistics` 
+            WHERE `project_id` = #{projectId} 
+            AND `createtime` >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) 
+            AND `createtime` &lt; CURDATE() 
+            GROUP BY 
+            <choose>
+                <when test="by == 'tag'">`tag`</when>
+                <otherwise>`ip`</otherwise>
+            </choose>
+        ) AS `t_count`
+    </select>
+
+    <select id="ipRegionCountList" resultType="StatisticsRegionCountVO" parameterType="string">
+        SELECT COUNT(0) as count, `ip_region` as `region` FROM `t_statistics` WHERE `project_id` = #{projectId}  GROUP BY `ip_region`
+    </select>
+
+    <select id="hour24CountList" resultType="StatisticsTimeCountVO" parameterType="string">
+        SELECT DATE_FORMAT(createtime, '%H') AS `hour`,
+        COUNT(0) AS `count`
+        FROM `t_statistics`
+        WHERE `project_id` = #{projectId}
+        AND `createtime` >= CURDATE()
+        GROUP BY `hour`
+    </select>
+
+    <select id="days10CountList" resultType="StatisticsDateCountVO" parameterType="string">
+        SELECT DATE_FORMAT(createtime,'%Y-%m-%d') AS `date`,
+        COUNT(0) AS `count`
+        FROM `t_statistics`
+        WHERE `project_id` = #{projectId}
+        AND `createtime` >= DATE_SUB(CURDATE(), INTERVAL 10 DAY)
+        GROUP BY `date`
+        ORDER BY `date` desc
+    </select>
+
+    <select id="months12CountList" resultType="StatisticsDateCountVO" parameterType="string">
+        SELECT DATE_FORMAT(createtime,'%Y-%m') AS `date`,
+        COUNT(0) AS `count`
+        FROM `t_statistics`
+        WHERE `project_id` = #{projectId}
+        AND `createtime` >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        GROUP BY `date`
+        ORDER BY `date` desc
+    </select>
+
+    <select id="listCount" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM `t_statistics` WHERE `project_id` = #{projectId}
+    </select>
+
+    <select id="todayListCount" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM `t_statistics` WHERE `project_id` = #{projectId} AND `createtime` >= CURDATE()
+    </select>
+
+    <select id="yesterdayListCount" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM `t_statistics` 
+        WHERE `project_id` = #{projectId} 
+        AND `createtime` >= DATE_SUB(CURDATE(), INTERVAL 1 DAY) 
+        AND `createtime` &lt; CURDATE()
+    </select>
+
+    <select id="lastDays7ListCount" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM `t_statistics` 
+        WHERE `project_id` = #{projectId} 
+        AND `createtime` >= DATE_SUB(CURDATE(), INTERVAL 14 DAY) 
+        AND `createtime` &lt; DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+    </select>
+
+    <select id="days7ListCount" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM `t_statistics` WHERE `project_id` = #{projectId} AND `createtime` >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+    </select>
+
+    <select id="days30ListCount" resultType="int" parameterType="string">
+        SELECT COUNT(0) FROM `t_statistics` WHERE `project_id` = #{projectId} AND `createtime` >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+    </select>
+
+    <select id="listById" resultType="StatisticsPO" parameterType="string">
+        SELECT * FROM `t_statistics` WHERE `id` = #{id}
+    </select>
+
+    <insert id="insertOne" parameterType="StatisticsPO">
+        INSERT INTO `t_statistics`(`id`, `ip`, `ip_region`, `tag`, `from`, `project_id`) VALUES (#{id},#{ip},#{ipRegion},#{tag},#{from},#{projectId})
+    </insert>
+
+    <delete id="deleteById" parameterType="string">
+        DELETE FROM `t_statistics` WHERE `id` = #{id}
+    </delete>
+</mapper>
+

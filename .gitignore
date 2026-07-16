@@ -1,34 +1,47 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# OS files
 .DS_Store
+Thumbs.db
+*.db
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IDEs and Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 *.iml
 *.ipr
+*.iws
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Build outputs and dependency directories in sub-projects
+**/node_modules/
+**/dist/
+**/target/
+**/build/
+**/out/
 
-### VS Code ###
-.vscode/
+# Package outputs (Java jars, wars, ears, zips, tar.gz)
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+# Exclude maven-wrapper.jar from being ignored so mvnw works
+!**/maven-wrapper.jar
+
+# Log files
+*.log
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+
+# Local env files
+**/.env.local
+**/.env.*.local
+
+# Temp files
+.tmp/
+.temp/
