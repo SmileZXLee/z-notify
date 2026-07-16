@@ -25,7 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+
+import org.springframework.http.ResponseEntity;
 
 /**
  * @program: z-notify-api
@@ -82,10 +85,109 @@ public class PublicController {
     @NoLoginAuth
     public Result<List<VersionVO>> getVersions(
             @NotEmpty @PathVariable("project_id") String projectId,
-            @Pattern(regexp = "^\\d(.\\d)*$", message = "版本号格式不合法") @PathVariable("version") String version,
+            @Pattern(regexp = "^\\d+(\\.\\d+)*$", message = "版本号格式不合法") @PathVariable("version") String version,
             @RequestParam(value = "platform", required = false) String platform,
-            @RequestParam(value = "lang", required = false) String lang){
+            @RequestParam(value = "lang", required = false) String lang) {
         return Result.success(versionService.publicListByVersion(projectId, version, platform, lang));
+    }
+
+    @GetMapping("/versions/{project_id}/{version}/tauri")
+    @ApiOperation("支持 Tauri 自动更新器的专用接口")
+    @NoLoginAuth
+    public ResponseEntity<Map<String, Object>> getTauriVersions(
+            @NotEmpty @PathVariable("project_id") String projectId,
+            @Pattern(regexp = "^\\d+(\\.\\d+)*$", message = "版本号格式不合法") @PathVariable("version") String version,
+            @RequestParam(value = "platform", required = false) String platform,
+            @RequestParam(value = "lang", required = false) String lang) {
+
+        List<VersionVO> versions = versionService.publicListByVersion(projectId, version, platform, lang);
+        if (versions == null || versions.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        VersionVO latest = versions.get(0);
+
+        String downloadUrl = latest.getDownloadUrl() != null ? latest.getDownloadUrl().toString() : "";
+        String signature = latest.getConfig() != null ? latest.getConfig() : "";
+        String notes = latest.getContent() != null ? latest.getContent() : "";
+
+        Map<String, Object> response = new java.util.LinkedHashMap<>();
+        response.put("version", latest.getVersion());
+
+        String pubDate = "";
+        if (latest.getCreatetime() != null) {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                    .withZone(java.time.ZoneId.of("UTC"));
+            pubDate = formatter.format(latest.getCreatetime().toInstant());
+        } else {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                    .withZone(java.time.ZoneId.of("UTC"));
+            pubDate = formatter.format(new java.util.Date().toInstant());
+        }
+        response.put("pub_date", pubDate);
+        response.put("url", downloadUrl);
+        response.put("signature", signature);
+        response.put("notes", notes);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/versions/{project_id}/{version}/electron")
+    @ApiOperation("支持 Electron built-in autoUpdater (Squirrel) 规格的专用接口")
+    @NoLoginAuth
+    public ResponseEntity<Map<String, Object>> getElectronVersions(
+            @NotEmpty @PathVariable("project_id") String projectId,
+            @Pattern(regexp = "^\\d+(\\.\\d+)*$", message = "版本号格式不合法") @PathVariable("version") String version,
+            @RequestParam(value = "platform", required = false) String platform,
+            @RequestParam(value = "lang", required = false) String lang) {
+        List<VersionVO> versions = versionService.publicListByVersion(projectId, version, platform, lang);
+        if (versions == null || versions.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        VersionVO latest = versions.get(0);
+
+        String downloadUrl = "";
+        if (latest.getPlatformSettings() instanceof Map) {
+            Map<String, Object> settingsMap = (Map<String, Object>) latest.getPlatformSettings();
+            if (org.springframework.util.StringUtils.hasText(platform)) {
+                String targetPlatform = platform.toLowerCase();
+                for (Map.Entry<String, Object> entry : settingsMap.entrySet()) {
+                    if (entry.getKey().toLowerCase().equals(targetPlatform)) {
+                        Object platformOverride = entry.getValue();
+                        if (platformOverride instanceof Map) {
+                            Map<String, Object> overrideDetail = (Map<String, Object>) platformOverride;
+                            if (overrideDetail.containsKey("download_url") && overrideDetail.get("download_url") != null) {
+                                downloadUrl = overrideDetail.get("download_url").toString();
+                            } else if (overrideDetail.containsKey("downloadUrl") && overrideDetail.get("downloadUrl") != null) {
+                                downloadUrl = overrideDetail.get("downloadUrl").toString();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!org.springframework.util.StringUtils.hasText(downloadUrl) && latest.getDownloadUrl() != null) {
+            downloadUrl = latest.getDownloadUrl().toString();
+        }
+
+        Map<String, Object> response = new java.util.LinkedHashMap<>();
+        response.put("url", downloadUrl);
+        response.put("name", latest.getVersion());
+        response.put("notes", latest.getContent());
+
+        String pubDate = "";
+        if (latest.getCreatetime() != null) {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                    .withZone(java.time.ZoneId.of("UTC"));
+            pubDate = formatter.format(latest.getCreatetime().toInstant());
+        } else {
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                    .withZone(java.time.ZoneId.of("UTC"));
+            pubDate = formatter.format(new java.util.Date().toInstant());
+        }
+        response.put("pub_date", pubDate);
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/feedback/feedback")
@@ -156,12 +258,11 @@ public class PublicController {
     @ApiOperation("访问一次项目并获取项目统计信息以badge形式展示(依赖于shields.io)")
     @NoLoginAuth
     public String visitAndGetStatisticsOnBadge(HttpServletRequest request, HttpServletResponse response, @NotEmpty @PathVariable("project_id") String projectId, @Validated StatisticsBadgeBO badgeBO) {
+        response.setHeader("Cache-Control", "no-cache,max-age=0,no-store,s-maxage=0,proxy-revalidate");
+        response.setHeader("Expires", "0");
         if (Objects.equals(projectId, "8316326835763216384")) {
             return null;
         }
-        response.setHeader("Cache-Control", "no-cache,max-age=0,no-store,s-maxage=0,proxy-revalidate");
-        response.setHeader("Expires", "0");
-
         String ip = IpUtils.getIpAddr(request);
         StatisticsBO bo = new StatisticsBO();
         bo.setProjectId(projectId);
@@ -178,4 +279,3 @@ public class PublicController {
         return thirdPartyApiService.getBadge(badgeBO.getTitle(), count.toString(), badgeBO.getColor(), badgeBO.getStyle());
     }
 }
-
