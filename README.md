@@ -4,7 +4,7 @@
     <img alt="logo" src="https://admin.z-notify.zxlee.cn/logo.png" width="120" height="120" style="margin-bottom: 20px;">
 </p>
 <h1 align="center">Z-Notify</h1>
-<h5 align="center">一个开源的应用统一在线管理平台，支持多端部署与极简对接</h5>
+<h5 align="center">一个开源的应用统一在线管理平台</h5>
 
 ---
 
