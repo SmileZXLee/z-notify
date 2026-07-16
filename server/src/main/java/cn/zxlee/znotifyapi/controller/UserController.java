@@ -44,8 +44,7 @@ public class UserController {
     @ApiOperation("用户注册")
     @NoLoginAuth
     public Result doRegister(@Validated @RequestBody UserRegisterBO userBO){
-        userService.doRegister(userBO);
-        return Result.success();
+        return Result.fail("注册功能已暂时关闭");
     }
 
     @PostMapping("/login")
