@@ -1,5 +1,6 @@
 package cn.zxlee.znotifyapi.config;
 
+import cn.zxlee.znotifyapi.interceptor.IpLimitInterceptor;
 import cn.zxlee.znotifyapi.interceptor.UserHandlerInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +20,15 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Autowired
     private UserHandlerInterceptor userHandlerInterceptor;
 
+    @Autowired
+    private IpLimitInterceptor ipLimitInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // IP rate limiting and permanent blacklisting for public APIs and login endpoint
+        registry.addInterceptor(ipLimitInterceptor)
+                .addPathPatterns("/v1/public/**", "/v1/user/login");
+
         // 注册拦截器 拦截路径为 /** 放行 /user/to_login /user/login路径
         registry.addInterceptor(userHandlerInterceptor)
                 .addPathPatterns("/**")

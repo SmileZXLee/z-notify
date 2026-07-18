@@ -21,6 +21,25 @@ public class StatisticsVO extends BasePOJO {
     private String projectId;
     @ApiModelProperty("访问者的ip地址")
     private String ip;
+
+    public String getIp() {
+        if (this.ip == null || this.ip.isEmpty()) {
+            return this.ip;
+        }
+        if (this.ip.contains(".")) {
+            int lastDotIndex = this.ip.lastIndexOf(".");
+            if (lastDotIndex > 0) {
+                return this.ip.substring(0, lastDotIndex) + ".*";
+            }
+        } else if (this.ip.contains(":")) {
+            int lastColonIndex = this.ip.lastIndexOf(":");
+            if (lastColonIndex > 0) {
+                return this.ip.substring(0, lastColonIndex) + ":*";
+            }
+        }
+        return this.ip;
+    }
+
     @ApiModelProperty("访问者的ip归属地")
     private String ipRegion;
     @ApiModelProperty("用于额外区分不同个体的标签")

@@ -142,4 +142,17 @@ CREATE TABLE `t_version` (
   CONSTRAINT `project_id_key_version` FOREIGN KEY (`project_id`) REFERENCES `t_project` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC;
 
+-- ----------------------------
+-- Table structure for t_ip_blacklist
+-- ----------------------------
+DROP TABLE IF EXISTS `t_ip_blacklist`;
+CREATE TABLE `t_ip_blacklist` (
+  `id` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'id',
+  `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被拉黑的ip地址',
+  `createtime` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updatetime` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_ip_unique` (`ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
