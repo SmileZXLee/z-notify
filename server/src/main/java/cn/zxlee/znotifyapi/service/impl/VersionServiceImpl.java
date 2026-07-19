@@ -29,6 +29,10 @@ public class VersionServiceImpl extends BaseInProjectServiceImpl implements IVer
     private VersionMapper versionMapper;
 
     private void resolveVoDetails(VersionPO po, VersionVO vo) {
+        resolveVoDetails(po, vo, false);
+    }
+
+    private void resolveVoDetails(VersionPO po, VersionVO vo, boolean replaceVersion) {
         if (po == null || vo == null) {
             return;
         }
@@ -46,11 +50,13 @@ public class VersionServiceImpl extends BaseInProjectServiceImpl implements IVer
                 vo.setPlatformSettings(po.getPlatformSettings());
             }
         }
-        if (org.springframework.util.StringUtils.hasText(vo.getConfig())) {
-            vo.setConfig(vo.getConfig().replace("{version}", vo.getVersion()));
+        if (replaceVersion) {
+            if (org.springframework.util.StringUtils.hasText(vo.getConfig())) {
+                vo.setConfig(vo.getConfig().replace("{version}", vo.getVersion()));
+            }
+            vo.setDownloadUrl(resolveDownloadUrl(vo.getDownloadUrl(), vo.getVersion()));
+            vo.setPlatformSettings(resolvePlatformSettings(vo.getPlatformSettings(), vo.getVersion()));
         }
-        vo.setDownloadUrl(resolveDownloadUrl(vo.getDownloadUrl(), vo.getVersion()));
-        vo.setPlatformSettings(resolvePlatformSettings(vo.getPlatformSettings(), vo.getVersion()));
     }
 
     private Object resolveDownloadUrl(Object downloadUrl, String version) {
@@ -104,7 +110,7 @@ public class VersionServiceImpl extends BaseInProjectServiceImpl implements IVer
     public List<VersionVO> list(Map map) {
         checkIsCurrentProject(map.get("token").toString(), map.get("projectId").toString());
         return BeanConvertUtils.convertListTo(versionMapper.list(map), VersionVO::new, (po, vo) -> {
-            resolveVoDetails(po, vo);
+            resolveVoDetails(po, vo, false);
         });
     }
 
@@ -117,7 +123,7 @@ public class VersionServiceImpl extends BaseInProjectServiceImpl implements IVer
         pageResultVO.setPageSize(pageInfo.getPageSize());
         pageResultVO.setTotal(pageInfo.getTotal());
         pageResultVO.setResults(BeanConvertUtils.convertListTo(pageInfo.getList(), VersionVO::new, (po, vo) -> {
-            resolveVoDetails(po, vo);
+            resolveVoDetails(po, vo, false);
         }));
         com.github.pagehelper.PageHelper.clearPage();
         return pageResultVO;
@@ -172,7 +178,7 @@ public class VersionServiceImpl extends BaseInProjectServiceImpl implements IVer
     @Override
     public List<VersionVO> publicListByVersion(String projectId, String version, String platform, String lang) {
         List<VersionVO> list = BeanConvertUtils.convertListTo(versionMapper.listByHigherVersion(projectId, version), VersionVO::new, (po, vo) -> {
-            resolveVoDetails(po, vo);
+            resolveVoDetails(po, vo, true);
         });
 
         // 首先解析顶层默认的多语言更新日志
